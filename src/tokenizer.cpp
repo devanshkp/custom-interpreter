@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 #include <vector>
 #include <cctype>
@@ -6,7 +7,7 @@
 
 using namespace std;
 
-// TokenType enum
+// TOKENTYPE ENUM
 enum class TokenType {
     Keyword,
     Identifier,
@@ -19,7 +20,7 @@ enum class TokenType {
     EndOfFile,
 };
 
-// Token struct
+// TOKEN STRUCT
 struct Token {
     TokenType type;
     string value;
@@ -27,7 +28,7 @@ struct Token {
     int column;
 };
 
-// Lexer class definition and implementation
+// LEXER CLASS
 class Lexer {
 public:
     Lexer(const string& source) : src(source), pos(0), line(1), column(1) {}
@@ -61,6 +62,22 @@ public:
         return tokens;
     }
 
+    string tokenTypeToString(TokenType type) {
+        switch (type) {
+            case TokenType::Keyword:     return "Keyword";
+            case TokenType::Identifier:  return "Identifier";
+            case TokenType::Integer:     return "Integer";
+            case TokenType::Float:       return "Float";
+            case TokenType::String:      return "String";
+            case TokenType::Boolean:     return "Boolean";
+            case TokenType::Operator:    return "Operator";
+            case TokenType::Punctuation: return "Punctuation";
+            case TokenType::EndOfFile:   return "EndOfFile";
+            default:                     return "Unknown";
+        }
+    }
+
+
 private:
     string src;
     size_t pos;
@@ -68,15 +85,22 @@ private:
     int column;
     const unordered_set<string> keywords = {
         "fn", "int", "str", "bool", "arr",
-        "if", "else", "while", "return", "true", "false"
+        "if", "else", "while", "return"
     };
 
     const unordered_set<string> keywordOperators = {
         "is", "and", "or", "not"
     };
 
-    const unordered_set<string> symbolicOperators = {
-        "+", "-", "*", "/", "%", "=", "==", "!=", "<", ">", "<=", ">="
+    const unordered_set<string> multiCharOperators = {
+        "==", "!=", "<=", ">=", "&&", "||",
+        "++", "--", "+=", "-=", "*=", "/=",
+        "%=", "&=", "|=", "^=", "->"
+    };
+
+    const unordered_set<char> singleCharOperators = {
+        '+', '-', '*', '/', '%', '=', '!', '<', '>',
+        '&', '|', '^'
     };
 
 
@@ -110,22 +134,118 @@ private:
     }
 
     bool isOperatorStart(char c) {
-        static const string ops = "+-*/%=!<>|&";
-        return ops.find(c) != std::string::npos;
+        return singleCharOperators.count(c);
     }
 
 
-    Token makeToken(TokenType type, const std::string& value) {
+    Token makeToken(TokenType type, const string& value) {
         return Token{type, value, line, column};
     }
 
 
-    // Declarations for helper functions
-    Token readIdentifierOrKeyword();
-    Token readNumericalLiteral();
-    Token readString();
-    Token readOperator();
+    Token readIdentifierOrKeyword(){
+        size_t startPos = pos;
+        int tokenLine = line;
+        int tokenColumn = column;
+
+        while (isalnum(peek()) || peek() == '_') advance();
+
+        string word = src.substr(startPos, pos - startPos);
+
+        if (keywords.count(word)) {
+            return Token{TokenType::Keyword, word, tokenLine, tokenColumn};
+        }
+
+        if (keywordOperators.count(word)) {
+            return Token{TokenType::Operator, word, tokenLine, tokenColumn};
+        }
+
+        if (word == "true" || word == "false") {
+            return Token{TokenType::Boolean, word, tokenLine, tokenColumn};
+        }
+
+        return Token{TokenType::Identifier, word, tokenLine, tokenColumn};
+    }
+
+    Token readNumericalLiteral(){
+        size_t startPos = pos;
+        int tokenLine = line;
+        int tokenColumn = column;
+        bool isFloat = false;
+
+        while (isdigit(peek())) advance();
+
+        if (peek() == '.' && isdigit(peekNext())){
+            isFloat = true;
+            advance();
+            while (isdigit(peek())) advance();
+        } 
+
+        string num = src.substr(startPos, pos - startPos);
+        return Token{isFloat ? TokenType::Float : TokenType::Integer, num, tokenLine, tokenColumn};
+    }
+
+    Token readString(){
+        advance(); // skip starting quote
+        size_t startPos = pos;
+        int tokenLine = line;
+        int tokenColumn = column;
+
+        while (peek() != '"' && peek() != '\0') {
+            advance();
+        }
+
+        if (peek() != '"'){
+            throw runtime_error("Unterminated string at line " + to_string(tokenLine) + ", column " + to_string(tokenColumn));
+        }
+        
+        string str = src.substr(startPos, pos - startPos);
+        advance();
+        return Token{TokenType::String, str, tokenLine, tokenColumn};
+    }
+
+    Token readOperator()
+    {
+        int tokenLine = line;
+        int tokenColumn = column;
+        
+        char firstOp = peek();
+        char secondOp = peekNext();
+
+        string currentOp = string(1, firstOp) + string(1, secondOp);
+
+        if (multiCharOperators.count(currentOp)){
+            advance();
+        } else {
+            currentOp = string(1, firstOp);
+        }
+
+        advance();
+        return Token{TokenType::Operator, currentOp, tokenLine, tokenColumn};
+    }
 };
 
-// Implement helper functions here
-// e.g., Token Lexer::readIdentifierOrKeyword() { ... }
+int main() {
+    string code = R"(
+        fn greet(str name) -> str {
+            if name is "Alice" {
+                return "Hello Alice"
+            } else {
+                return "Hello stranger"
+            }
+        }
+
+        str user = input("What is your name?")
+        write(greet(user))
+    )";
+
+    Lexer lexer(code);
+    auto tokens = lexer.tokenize();
+
+    for (const auto& token : tokens) {
+        cout << "Token(" << lexer.tokenTypeToString(token.type) << ", \"" << token.value 
+             << "\", Line: " << token.line << ", Col: " << token.column << ")\n";
+    }
+
+    return 0;
+}
