@@ -1,7 +1,5 @@
 {
   "files.associations": {
-    "*.css": "tailwindcss",
-    "stdexcept": "cpp",
-    "unordered_set": "cpp"
+    "*.css": "tailwindcss"
   }
 }
