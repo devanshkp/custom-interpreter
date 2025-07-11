@@ -1,0 +1,14 @@
+fn greet(str name) -> str {
+    if name is "Alice" {
+        return "Hello Alice"
+    } else {
+        return "Hello stranger"
+    }
+}
+
+str user = input("What is your name?")
+write(greet(user))
+
+float score = 10.24563
+int age = 10
+age++

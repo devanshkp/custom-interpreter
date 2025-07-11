@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <cctype>
@@ -84,7 +85,7 @@ private:
     int line;
     int column;
     const unordered_set<string> keywords = {
-        "fn", "int", "str", "bool", "arr",
+        "fn", "int", "float", "string", "bool", "arr",
         "if", "else", "while", "return"
     };
 
@@ -226,18 +227,8 @@ private:
 };
 
 int main() {
-    string code = R"(
-        fn greet(str name) -> str {
-            if name is "Alice" {
-                return "Hello Alice"
-            } else {
-                return "Hello stranger"
-            }
-        }
-
-        str user = input("What is your name?")
-        write(greet(user))
-    )";
+    ifstream infile("code.txt");
+    string code = {istreambuf_iterator<char>(infile), istreambuf_iterator<char>()};
 
     Lexer lexer(code);
     auto tokens = lexer.tokenize();
