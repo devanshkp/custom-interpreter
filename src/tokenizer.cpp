@@ -5,29 +5,9 @@
 #include <cctype>
 #include <stdexcept>
 #include <unordered_set>
+#include <token.h>
 
 using namespace std;
-
-// TOKENTYPE ENUM
-enum class TokenType {
-    Keyword,
-    Identifier,
-    Integer,
-    Float,
-    String,
-    Boolean,
-    Operator,
-    Punctuation,
-    EndOfFile,
-};
-
-// TOKEN STRUCT
-struct Token {
-    TokenType type;
-    string value;
-    int line;
-    int column;
-};
 
 // LEXER CLASS
 class Lexer {
@@ -61,21 +41,6 @@ public:
 
         tokens.push_back(makeToken(TokenType::EndOfFile, ""));
         return tokens;
-    }
-
-    string tokenTypeToString(TokenType type) {
-        switch (type) {
-            case TokenType::Keyword:     return "Keyword";
-            case TokenType::Identifier:  return "Identifier";
-            case TokenType::Integer:     return "Integer";
-            case TokenType::Float:       return "Float";
-            case TokenType::String:      return "String";
-            case TokenType::Boolean:     return "Boolean";
-            case TokenType::Operator:    return "Operator";
-            case TokenType::Punctuation: return "Punctuation";
-            case TokenType::EndOfFile:   return "EndOfFile";
-            default:                     return "Unknown";
-        }
     }
 
 
@@ -234,7 +199,7 @@ int main() {
     auto tokens = lexer.tokenize();
 
     for (const auto& token : tokens) {
-        cout << "Token(" << lexer.tokenTypeToString(token.type) << ", \"" << token.value 
+        cout << "Token(" << tokenTypeToString(token.type) << ", \"" << token.value 
              << "\", Line: " << token.line << ", Col: " << token.column << ")\n";
     }
 
