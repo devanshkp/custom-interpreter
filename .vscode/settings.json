@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "memory": "cpp",
+    "unordered_set": "cpp"
+  }
+}

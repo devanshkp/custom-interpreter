@@ -1,6 +1,6 @@
 #include "parser.h"
+#include <language_defs.h>
 #include <stdexcept>
-
 
 Parser::Parser(const vector<Token>& tokens)
     : tokens(tokens), current(0) {}
@@ -57,11 +57,59 @@ const Token& Parser::consume(TokenType type, const string& message){
 // === Parsing methods ===
 // =====================
 
-vector<unique_ptr<Statement>> Parser::parse() {
+vector<unique_ptr<Statement>> Parser::parse(){
+    vector<unique_ptr<Statement>> statements;
     while (!isAtEnd()){
-
+        statements.push_back(declaration());
     }
 
-    return vector<unique_ptr<Statement>>();
+    return statements;
 }
 
+
+unique_ptr<Statement> Parser::declaration(){
+    if (match(TokenType::Keyword) && previous().value == "fn") return functionDeclaration();
+    if (match(TokenType::Keyword) && variableTypes.count(previous().value)) return varDeclaration();
+    return statement();
+}
+
+unique_ptr<Statement> Parser::statement(){
+    if (match(TokenType::Keyword) && previous().value == "if") return ifStatement();
+    if (match(TokenType::Keyword) && previous().value == "while") return whileStatement();
+    if (match(TokenType::Keyword) && previous().value == "return") return returnStatement();
+    return expressionStatement();
+}
+
+unique_ptr<Statement> Parser::varDeclaration(){
+
+}
+
+unique_ptr<Statement> Parser::ifStatement(){
+
+}
+
+unique_ptr<Statement> Parser::whileStatement(){
+
+}
+
+unique_ptr<Statement> Parser::returnStatement(){
+
+}
+
+unique_ptr<Statement> Parser::functionDeclaration(){
+
+}
+
+unique_ptr<Statement> Parser::expressionStatement(){
+
+}
+
+unique_ptr<Expression> expression();
+unique_ptr<Expression> assignment();
+unique_ptr<Expression> equality();
+unique_ptr<Expression> comparison();
+unique_ptr<Expression> term();
+unique_ptr<Expression> factor();
+unique_ptr<Expression> unary();
+unique_ptr<Expression> call();
+unique_ptr<Expression> primary();

@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <unordered_set>
 #include "token.h"
+#include "language_defs.h"
 
 using namespace std;
 
@@ -49,25 +50,7 @@ private:
     size_t pos;
     int line;
     int column;
-    const unordered_set<string> keywords = {
-        "fn", "int", "float", "string", "bool", "arr",
-        "if", "else", "while", "return"
-    };
 
-    const unordered_set<string> keywordOperators = {
-        "is", "and", "or", "not"
-    };
-
-    const unordered_set<string> multiCharOperators = {
-        "==", "!=", "<=", ">=", "&&", "||",
-        "++", "--", "+=", "-=", "*=", "/=",
-        "%=", "&=", "|=", "^=", "->"
-    };
-
-    const unordered_set<char> singleCharOperators = {
-        '+', '-', '*', '/', '%', '=', '!', '<', '>',
-        '&', '|', '^'
-    };
 
 
     char peek() {
